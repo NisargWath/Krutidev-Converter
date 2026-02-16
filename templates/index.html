@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎙️ Voice to Krutidev Converter</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+      }
+
+      .language-selector {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .language-selector label {
+        margin: 0 20px;
+        font-size: 1.1em;
+        cursor: pointer;
+      }
+
+      .language-selector input[type="radio"] {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .tab {
+        padding: 15px 30px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 1.1em;
+        color: #666;
+        transition: all 0.3s;
+      }
+
+      .tab.active {
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .upload-area:hover {
+        border-color: #764ba2;
+        background: #f8f9ff;
+      }
+
+      .upload-area.dragover {
+        background: #e8e9ff;
+        border-color: #764ba2;
+      }
+
+      #audioFile {
+        display: none;
+      }
+
+      .record-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 20px 40px;
+        font-size: 1.2em;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin: 20px auto;
+        display: block;
+      }
+
+      .record-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .record-button.recording {
+        background: linear-gradient(135deg, #fc5c7d 0%, #c13584 100%);
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .transcribe-button {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1em;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .transcribe-button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+      }
+
+      .transcribe-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .result-section {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .result-section.show {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .result-box h3 {
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .result-box textarea {
+        width: 100%;
+        min-height: 150px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        font-size: 1em;
+        font-family: monospace;
+        resize: vertical;
+      }
+
+      .download-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .download-button {
+        flex: 1;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-size: 1em;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .download-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+      }
+
+      .spinner {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .spinner.show {
+        display: block;
+      }
+
+      .spinner::after {
+        content: "";
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error {
+        background: #fee;
+        color: #c00;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        display: none;
+      }
+
+      .error.show {
+        display: block;
+      }
+
+      .success {
+        background: #efe;
+        color: #060;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        display: none;
+      }
+
+      .success.show {
+        display: block;
+      }
+
+      audio {
+        width: 100%;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎙️ Voice to Krutidev Converter</h1>
+
+      <div class="language-selector">
+        <label>
+          <input type="radio" name="language" value="hi-IN" checked />
+          Hindi
+        </label>
+        <label>
+          <input type="radio" name="language" value="mr-IN" />
+          Marathi
+        </label>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="record">🎙️ Record Audio</button>
+        <button class="tab" data-tab="upload">📁 Upload Audio</button>
+      </div>
+
+      <!-- Record Tab -->
+      <div class="tab-content active" id="record">
+        <button class="record-button" id="recordButton">
+          <span id="recordText">🎤 Click to Record</span>
+        </button>
+        <audio id="recordedAudio" controls style="display: none"></audio>
+        <button
+          class="transcribe-button"
+          id="transcribeRecorded"
+          style="display: none"
+        >
+          Transcribe Recorded Audio
+        </button>
+      </div>
+
+      <!-- Upload Tab -->
+      <div class="tab-content" id="upload">
+        <div class="upload-area" id="uploadArea">
+          <p style="font-size: 1.2em; color: #667eea; margin-bottom: 10px">
+            📁 Drop audio file here or click to browse
+          </p>
+          <p style="color: #999">Supported formats: WAV, MP3, M4A, FLAC, AAC</p>
+          <input
+            type="file"
+            id="audioFile"
+            accept=".wav,.mp3,.m4a,.flac,.aac"
+          />
+        </div>
+        <audio id="uploadedAudio" controls style="display: none"></audio>
+        <button
+          class="transcribe-button"
+          id="transcribeUploaded"
+          style="display: none"
+        >
+          Transcribe Uploaded Audio
+        </button>
+      </div>
+
+      <div class="spinner" id="spinner"></div>
+      <div class="error" id="error"></div>
+      <div class="success" id="success"></div>
+
+      <div class="result-section" id="results">
+        <div class="result-box">
+          <h3>Original Text</h3>
+          <textarea id="unicodeText" readonly></textarea>
+        </div>
+
+        <div class="result-box">
+          <h3>Krutidev Text</h3>
+          <textarea id="krutidevText" readonly></textarea>
+        </div>
+
+        <div class="download-buttons">
+          <button class="download-button" id="downloadTxt">
+            📁 Download TXT
+          </button>
+          <button class="download-button" id="downloadDocx">
+            📄 Download Word
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let mediaRecorder;
+      let audioChunks = [];
+      let recordedBlob = null;
+      let uploadedFile = null;
+
+      // Tab switching
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((c) => c.classList.remove("active"));
+
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.tab).classList.add("active");
+
+          hideResults();
+        });
+      });
+
+      // Recording functionality
+      const recordButton = document.getElementById("recordButton");
+      const recordText = document.getElementById("recordText");
+      const recordedAudio = document.getElementById("recordedAudio");
+      const transcribeRecorded = document.getElementById("transcribeRecorded");
+
+      recordButton.addEventListener("click", async () => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+            });
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+              audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+              recordedBlob = new Blob(audioChunks, { type: "audio/wav" });
+              const audioUrl = URL.createObjectURL(recordedBlob);
+              recordedAudio.src = audioUrl;
+              recordedAudio.style.display = "block";
+              transcribeRecorded.style.display = "block";
+            };
+
+            audioChunks = [];
+            mediaRecorder.start();
+            recordButton.classList.add("recording");
+            recordText.textContent = "⏹️ Stop Recording";
+          } catch (err) {
+            showError("Could not access microphone: " + err.message);
+          }
+        } else {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+          recordButton.classList.remove("recording");
+          recordText.textContent = "🎤 Click to Record";
+        }
+      });
+
+      // Upload functionality
+      const uploadArea = document.getElementById("uploadArea");
+      const audioFile = document.getElementById("audioFile");
+      const uploadedAudio = document.getElementById("uploadedAudio");
+      const transcribeUploaded = document.getElementById("transcribeUploaded");
+
+      uploadArea.addEventListener("click", () => audioFile.click());
+
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("dragover");
+      });
+
+      uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("dragover");
+      });
+
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove("dragover");
+
+        if (e.dataTransfer.files.length > 0) {
+          audioFile.files = e.dataTransfer.files;
+          handleFileSelect(e.dataTransfer.files[0]);
+        }
+      });
+
+      audioFile.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          handleFileSelect(e.target.files[0]);
+        }
+      });
+
+      function handleFileSelect(file) {
+        uploadedFile = file;
+        const audioUrl = URL.createObjectURL(file);
+        uploadedAudio.src = audioUrl;
+        uploadedAudio.style.display = "block";
+        transcribeUploaded.style.display = "block";
+      }
+
+      // Transcription
+      transcribeRecorded.addEventListener("click", () =>
+        transcribe(recordedBlob, "recorded")
+      );
+      transcribeUploaded.addEventListener("click", () =>
+        transcribe(uploadedFile, "uploaded")
+      );
+
+      async function transcribe(audioData, source) {
+        const language = document.querySelector(
+          'input[name="language"]:checked'
+        ).value;
+
+        const formData = new FormData();
+        formData.append("audio", audioData, source + ".wav");
+        formData.append("language", language);
+
+        showSpinner();
+        hideError();
+        hideSuccess();
+        hideResults();
+
+        try {
+          const response = await fetch("/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById("unicodeText").value = data.unicode_text;
+            document.getElementById("krutidevText").value = data.krutidev_text;
+            showResults();
+            showSuccess("Conversion Complete!");
+          } else {
+            showError(data.error || "Transcription failed");
+          }
+        } catch (err) {
+          showError("Network error: " + err.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+
+      // Download functions
+      document
+        .getElementById("downloadTxt")
+        .addEventListener("click", async () => {
+          const text = document.getElementById("krutidevText").value;
+
+          try {
+            const response = await fetch("/download/txt", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text }),
+            });
+
+            const blob = await response.blob();
+            downloadFile(blob, "krutidev.txt");
+          } catch (err) {
+            showError("Download failed: " + err.message);
+          }
+        });
+
+      document
+        .getElementById("downloadDocx")
+        .addEventListener("click", async () => {
+          const text = document.getElementById("krutidevText").value;
+
+          try {
+            const response = await fetch("/download/docx", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text }),
+            });
+
+            const blob = await response.blob();
+            downloadFile(blob, "krutidev.docx");
+          } catch (err) {
+            showError("Download failed: " + err.message);
+          }
+        });
+
+      function downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // UI helper functions
+      function showSpinner() {
+        document.getElementById("spinner").classList.add("show");
+      }
+
+      function hideSpinner() {
+        document.getElementById("spinner").classList.remove("show");
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("error");
+        errorDiv.textContent = message;
+        errorDiv.classList.add("show");
+      }
+
+      function hideError() {
+        document.getElementById("error").classList.remove("show");
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.getElementById("success");
+        successDiv.textContent = message;
+        successDiv.classList.add("show");
+      }
+
+      function hideSuccess() {
+        document.getElementById("success").classList.remove("show");
+      }
+
+      function showResults() {
+        document.getElementById("results").classList.add("show");
+      }
+
+      function hideResults() {
+        document.getElementById("results").classList.remove("show");
+      }
+    </script>
+  </body>
+</html>

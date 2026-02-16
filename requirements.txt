@@ -1,0 +1,8 @@
+Flask==3.0.0
+SpeechRecognition==3.10.1
+indic-transliteration==2.3.56
+python-docx==1.1.0
+Werkzeug==3.0.1
+
+pydub==0.25.1
+gunicorn==21.2.0
