@@ -13,7 +13,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
 
 # Allowed audio file extensions
-ALLOWED_EXTENSIONS = {'wav', 'mp3', 'm4a', 'flac', 'aac'}
+ALLOWED_EXTENSIONS = {'wav', 'flac', 'aiff'}
 
 # Unicode to Krutidev Mapping
 UNICODE_TO_KRUTIDEV = {
